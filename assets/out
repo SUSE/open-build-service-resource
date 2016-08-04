@@ -1,1 +1,26 @@
 #!/bin/sh
+
+OUTPUT_DIR=$1
+
+# {
+#   "params": {
+#     "branch": "develop",
+#     "repo": "some-repo"
+#   },
+#   "source": {
+#     "uri": "git@...",
+#     "private_key": "..."
+#   }
+# }
+
+# The script must emit the resulting version of the resource.
+
+echo <<EOF
+{
+  "version": { "ref": "61cebf" },
+  "metadata": [
+    { "name": "commit", "value": "61cebf" },
+    { "name": "author", "value": "Mick Foley" }
+  ]
+}
+EOF

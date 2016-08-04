@@ -1,1 +1,28 @@
 #!/bin/sh
+
+# {
+#   "source": {
+#     "uri": "git://some-uri",
+#     "branch": "develop",
+#     "private_key": "..."
+#   },
+#   "version": { "ref": "61cebf" }
+# }
+
+jq . < /dev/stdin > /tmp/input
+API=$(jq -r '.source.api // "https://api.opensuse.org"' /tmp/input)
+
+osc api /configuration
+
+# version will be omitted from the first request, in which case the resource should return the current version (not every version since the resource's inception).
+# print the array of new versions, in chronological order, to stdout, including the requested version if it's still valid.
+# The list may be empty, if there are no versions available at the source.
+# If the given version is already the latest, an array with that version as the sole entry should be listed.
+
+echo <<EOF
+[
+  { "ref": "61cbef" },
+  { "ref": "d74e01" },
+  { "ref": "7154fe" }
+]
+EOF

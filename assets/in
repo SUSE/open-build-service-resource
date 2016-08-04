@@ -1,1 +1,30 @@
 #!/bin/sh
+
+# {
+#   "source": {
+#     "uri": "git://some-uri",
+#     "branch": "develop",
+#     "private_key": "..."
+#   },
+#   "version": { "ref": "61cebf" }
+# }
+
+DESTINATION_DIR=$1
+
+osc co -r VERSION PROJECT PACKAGE
+
+osc up
+
+osc build release arch spec
+
+# The script must emit the fetched version, and may emit metadata as a list of key-value pairs. This data is intended for public consumption and will make it upstream, intended to be shown on the build's page.
+
+echo <<EOF
+{
+  "version": { "ref": "61cebf" },
+  "metadata": [
+    { "name": "commit", "value": "61cebf" },
+    { "name": "author", "value": "Hulk Hogan" }
+  ]
+}
+EOF
