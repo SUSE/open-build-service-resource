@@ -6,13 +6,13 @@ A Concourse CI resource to harness the incredible power of osc.
 
 * `api`: defaults to https://api.opensuse.org
 
-* `project`:
+* `project`: required
 
-* `package`:
+* `package`: required
 
-* `username`:
+* `username`: optional
 
-* `password`:
+* `password`: optional
 
 ## Example
 

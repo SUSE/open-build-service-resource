@@ -1,28 +1,94 @@
-#!/bin/sh
+#!/bin/bash
+# ATTENTION: don't run locally, will overwrite your .oscrc!!!
 
+# Input JSON from STDIN
 # {
 #   "source": {
-#     "uri": "git://some-uri",
-#     "branch": "develop",
-#     "private_key": "..."
+#     "api": "https://api.opensuse.org",
+#     "project": "home:mmanno",
+#     "package": "restic",
+#     "username": "username",
+#     "password": "password",
 #   },
 #   "version": { "ref": "61cebf" }
 # }
 
 jq . < /dev/stdin > /tmp/input
-API=$(jq -r '.source.api // "https://api.opensuse.org"' /tmp/input)
 
-osc api /configuration
+OSC_API=$(jq -r '.source.api // "https://api.opensuse.org"' /tmp/input)
+OSC_USERNAME=$(jq -r '.source.username // "guest"' /tmp/input)
+OSC_PASSWORD=$(jq -r '.source.password // ""' /tmp/input)
+OSC_PROJECT=$(jq -r '.source.project // ""' /tmp/input)
+OSC_PACKAGE=$(jq -r '.source.package // ""' /tmp/input)
+VERSION=$(jq -r '.version.ref // ""' /tmp/input)
 
-# version will be omitted from the first request, in which case the resource should return the current version (not every version since the resource's inception).
-# print the array of new versions, in chronological order, to stdout, including the requested version if it's still valid.
-# The list may be empty, if there are no versions available at the source.
-# If the given version is already the latest, an array with that version as the sole entry should be listed.
+cat > $HOME/.oscrc <<EOF
+[general]
+apiurl = $OSC_API
 
-echo <<EOF
+[$OSC_API]
+EOF
+
+if [ ! -z "$OSC_USERNAME" ]; then
+cat >> $HOME/.oscrc <<EOF
+user = $OSC_USERNAME
+pass = ${OSC_PASSWORD}
+EOF
+fi
+
+output_single_version() {
+  cat <<EOF
 [
-  { "ref": "61cbef" },
-  { "ref": "d74e01" },
-  { "ref": "7154fe" }
+  { "ref": "$1" }
 ]
 EOF
+}
+
+output_current() {
+  CUR=$(osc log --csv $OSC_PROJECT/$OSC_PACKAGE | head -1 | cut -d\| -f4)
+  output_single_version $CUR
+}
+
+output_newer_versions() {
+  VERSION="$1"
+  REFS=''
+  for version in $(osc log --csv $OSC_PROJECT/$OSC_PACKAGE | cut -d\| -f4); do
+
+    NEW_REF="{ \"ref\": \"$version\" }"
+    if [ "${#REFS}" != "0" ]; then
+      NEW_REF="{ \"ref\": \"$version\" },"
+    fi
+
+    REFS=$NEW_REF$REFS # prepend because of ,
+
+    if [ "$version" = "$VERSION" ]; then
+      break
+    fi
+  done
+
+  # The list may be empty, if there are no versions available at the source.
+  OUTPUT_STRING="[ $REFS ]"
+  echo $OUTPUT_STRING
+}
+
+# version will be omitted from the first request, in which case the resource should return the current version (not every version since the resource's inception).
+if [ -z "$VERSION" ]; then
+  output_current
+
+else
+
+  POS=$(osc log --csv $OSC_PROJECT/$OSC_PACKAGE | cut -d\| -f4 | nl | grep $VERSION | awk '{print $1}')
+  if [ -z "$POS" ]; then
+    # If your resource is unable to determine which versions are newer then the given version, then the current version of your resource should be returned.
+    output_current
+
+  elif [ "$POS" = "1" ]; then
+    # If the given version is already the latest, an array with that version as the sole entry should be listed.
+    output_single_version $VERSION
+
+  else
+    # print the array of new versions, in chronological order, to stdout, including the requested version if it's still valid.
+    output_newer_versions $VERSION
+
+  fi
+fi
