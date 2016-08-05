@@ -13,28 +13,13 @@
 #   "version": { "ref": "61cebf" }
 # }
 
-jq . < /dev/stdin > /tmp/input
+source $(dirname $0)/common.sh
 
-OSC_API=$(jq -r '.source.api // "https://api.opensuse.org"' /tmp/input)
-OSC_USERNAME=$(jq -r '.source.username // "guest"' /tmp/input)
-OSC_PASSWORD=$(jq -r '.source.password // ""' /tmp/input)
-OSC_PROJECT=$(jq -r '.source.project // ""' /tmp/input)
-OSC_PACKAGE=$(jq -r '.source.package // ""' /tmp/input)
-VERSION=$(jq -r '.version.ref // ""' /tmp/input)
+payload=$(mktemp /tmp/resource-in.XXXXXX)
+cat > $payload <&0
 
-cat > $HOME/.oscrc <<EOF
-[general]
-apiurl = $OSC_API
-
-[$OSC_API]
-EOF
-
-if [ ! -z "$OSC_USERNAME" ]; then
-cat >> $HOME/.oscrc <<EOF
-user = $OSC_USERNAME
-pass = ${OSC_PASSWORD}
-EOF
-fi
+parse_source_config
+create_oscrc
 
 output_single_version() {
   cat <<EOF
