@@ -8,7 +8,7 @@
 #     "project": "home:mmanno",
 #     "package": "restic",
 #     "username": "username",
-#     "password": "password",
+#     "password": "password"
 #   },
 #   "version": { "ref": "61cebf" }
 # }

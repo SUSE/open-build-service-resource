@@ -1,30 +1,44 @@
 #!/bin/sh
+# ATTENTION: don't run locally, will overwrite your .oscrc!!!
 
+# Input JSON from STDIN
 # {
 #   "source": {
-#     "uri": "git://some-uri",
-#     "branch": "develop",
-#     "private_key": "..."
+#     "api": "https://api.opensuse.org",
+#     "project": "home:mmanno",
+#     "package": "restic",
+#     "username": "username",
+#     "password": "password"
 #   },
 #   "version": { "ref": "61cebf" }
 # }
 
+source $(dirname $0)/common.sh
+
+payload=$(mktemp /tmp/resource-in.XXXXXX)
+cat > $payload <&0
+
+parse_source_config
+create_oscrc
+
 DESTINATION_DIR=$1
 
-osc co -r VERSION PROJECT PACKAGE
+cd $DESTINATION_DIR
+osc co -r $VERSION $OSC_PROJECT $OSC_PACKAGE
 
-osc up
+cd $OSC_PROJECT/$OSC_PACKAGE
+META=$(osc log --csv -r $VERSION)
 
-osc build release arch spec
 
 # The script must emit the fetched version, and may emit metadata as a list of key-value pairs. This data is intended for public consumption and will make it upstream, intended to be shown on the build's page.
-
-echo <<EOF
+cat <<EOF
 {
-  "version": { "ref": "61cebf" },
+  "version": { "ref": "$VERSION" },
   "metadata": [
-    { "name": "commit", "value": "61cebf" },
-    { "name": "author", "value": "Hulk Hogan" }
+    { "name": "author", "value": "$(echo $META | cut -d\| -f2)" },
+    { "name": "date", "value": "$(echo $META | cut -d\| -f3)" },
+    { "name": "version", "value": "$(echo $META | cut -d\| -f5)" },
+    { "name": "comment", "value": "$(echo $META | cut -d\| -f6)" }
   ]
 }
 EOF
