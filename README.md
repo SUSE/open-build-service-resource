@@ -42,14 +42,49 @@ jobs:
       config:
         run: touch osc-resource/some_work_on_package
     - put: osc-resource
+      params: { commit: { message: "new release" } }
 ```
 
 ## Behaviour
 
-### `check`: Check?
+### `check`: Check for new revisions
+
+The remote build service is checked for versions.
 
 ### `in`: Fetch from build service
 
-### `out`: Commit to build service
+Checks out sources from the build service.
 
-TODO support `params: { build: git-resource }` to build locally
+### `out`: Build and/or Commit to build service
+
+First `osc rm` is called on all array members of `remove_files` if present.
+
+If a `build` hash is present in the params, `osc build` will be called for the specified `repository` and `version`.
+
+The resource will commit changes to the build service if a commit message is present in `message`.
+In that case files from `add_files` will be added before commiting.
+
+#### Parameters
+
+     * `remove_files`: Array of file names to remove.
+     * `build.repository`: Repository to build for
+     * `build.arch`: Arch to build for
+     * `commit.message`: Commit message for new revision
+     * `commit.add_files`: Add these files before commiting
+
+#### Example
+
+```
+    - put: osc-resource
+      params:
+        remove_files:
+        - test.tmp
+        - build-stamp
+        build:
+          repository: openSUSE_Leap_42.1
+          arch: x86_64
+        commit:
+          message: new release
+          add_files:
+          - "*.tgz"
+```

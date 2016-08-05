@@ -1,26 +1,77 @@
-#!/bin/sh
-
-OUTPUT_DIR=$1
+#!/bin/bash
+# ATTENTION: don't run locally, will overwrite your .oscrc!!!
 
 # {
 #   "params": {
-#     "branch": "develop",
-#     "repo": "some-repo"
+#     "remove_files": ["test.tmp", "build-stamp"],
+#     "build": {
+#       "repository": "openSUSE_Leap_42.1",
+#       "arch": "x86_64"
+#     },
+#     "commit": {
+#       "message": "new release",
+#       "add_files": ["*.tgz"]
+#     }
 #   },
 #   "source": {
-#     "uri": "git@...",
-#     "private_key": "..."
+#     "api": "https://api.opensuse.org",
+#     "project": "home:mmanno",
+#     "package": "restic",
+#     "username": "username",
+#     "password": "password"
 #   }
 # }
 
-# The script must emit the resulting version of the resource.
+source $(dirname $0)/common.sh
 
-echo <<EOF
+payload=$(mktemp /tmp/resource-in.XXXXXX)
+cat > $payload <&0
+
+parse_source_config
+create_oscrc
+
+OSC_DIR=$1
+
+cd $OSC_DIR
+osc co -r $VERSION $OSC_PROJECT $OSC_PACKAGE
+
+cd $OSC_PROJECT/$OSC_PACKAGE
+
+build=$(jq -r '.params.build' < $payload)
+repository=$(jq -r '.params.build.repository' < $payload)
+arch=$(jq -r '.params.build.arch' < $payload)
+commit_message=$(jq -r '.params.commit.message' < $payload)
+
+files_count=$(jq -r '.params.remove_files | length' < $payload)
+for i in $(seq 0 $(expr "$files_count" - 1)); do
+  local file=$(jq -r ".params.remove_files[$i]" < $payload)
+  osc rm -f "$file"
+done
+
+if [ ! -z "$build" ]; then
+  osc build $repository $arch
+fi
+
+if [ ! -z "$commit_message" ]; then
+  files_count=$(jq -r '.params.commit.add_files | length' < $payload)
+  for i in $(seq 0 $(expr "$files_count" - 1)); do
+    local file=$(jq -r ".params.commit.add_files[$i]" < $payload)
+    osc add "$file"
+  done
+  osc commit -m"$commit_message"
+fi
+
+# The script must emit the resulting version of the resource.
+META=$(osc log --csv -r $VERSION)
+cat <<EOF
 {
-  "version": { "ref": "61cebf" },
+  "version": { "ref": "$VERSION" },
   "metadata": [
-    { "name": "commit", "value": "61cebf" },
-    { "name": "author", "value": "Mick Foley" }
+    { "name": "author", "value": "$(echo $META | cut -d\| -f2)" },
+    { "name": "date", "value": "$(echo $META | cut -d\| -f3)" },
+    { "name": "revision", "value": "$(echo $META | cut -d\| -f4)" },
+    { "name": "version", "value": "$(echo $META | cut -d\| -f5)" },
+    { "name": "comment", "value": "$(echo $META | cut -d\| -f6)" }
   ]
 }
 EOF
