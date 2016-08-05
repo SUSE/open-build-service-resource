@@ -1,11 +1,12 @@
 #!/bin/sh
+mkdir -p tmp
 sh assets/in tmp <<EOF
 {
   "source": {
     "api": "https://api.opensuse.org",
     "project": "home:mmanno",
-    "package": "restic"
+    "package": "open-build-service-resource-test"
   },
-  "version": { "ref": "aaed545254abe96f500eefd5b2dd88cd" }
+  "version": { "ref": "c103972f7e6df0a98fca5e94e1f32520" }
 }
 EOF

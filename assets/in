@@ -1,6 +1,8 @@
 #!/bin/sh
 # ATTENTION: don't run locally, will overwrite your .oscrc!!!
 
+set -e
+
 # Input JSON from STDIN
 # {
 #   "source": {
