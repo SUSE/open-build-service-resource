@@ -11,6 +11,7 @@ sh assets/out tmp <<EOF
   "params": {
      "remove_files": ["test.tmp", "build-stamp"],
      "build": {
+       "resource": "."
        "repository": "openSUSE_Leap_42.1",
        "arch": "x86_64"
      },

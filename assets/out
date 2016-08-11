@@ -36,18 +36,27 @@ cat > $payload <&0
 parse_source_config
 create_oscrc
 
-OSC_DIR=$1
+source=$1
 
-cd $OSC_DIR
+if [ -z "$source" ]; then
+  echo "usage: $0 <path/to/source>"
+  exit 1
+fi
 
-cd $OSC_PROJECT/$OSC_PACKAGE
-
-build=$(jq -r '.params.build' < $payload)
-repository=$(jq -r '.params.build.repository' < $payload)
-arch=$(jq -r '.params.build.arch' < $payload)
-commit_message=$(jq -r '.params.commit.message' < $payload)
-
+resource=$(jq -r '.params.resource // ""' < $payload)
+build=$(jq -r '.params.build // ""' < $payload)
+repository=$(jq -r '.params.build.repository // ""' < $payload)
+arch=$(jq -r '.params.build.arch // ""' < $payload)
+commit_message=$(jq -r '.params.commit.message // ""' < $payload)
 files_count=$(jq -r '.params.remove_files | length' < $payload)
+
+if [ -z "$resource" ]; then
+  echo "invalid payload (missing resource)"
+  exit 1
+fi
+
+cd $source/$resource/$OSC_PROJECT/$OSC_PACKAGE
+
 for i in $(seq 0 $(expr "$files_count" - 1)); do
   file=$(jq -r ".params.remove_files[$i]" < $payload)
   osc rm -f "$file"
