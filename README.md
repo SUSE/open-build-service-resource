@@ -1,6 +1,7 @@
 # Open Build Service Resource
 
-A Concourse CI resource to harness the incredible power of osc.
+A Concourse CI resource to interface with open build service.
+It can check the build service for newer releases, check out the package, build the package locally and commit it.
 
 ## Source Configuration
 
@@ -37,19 +38,22 @@ resources:
 jobs:
 - name: modify-package
   plan:
-    - get: osc-resource
-    - task: build
-      config:
-        run: touch osc-resource/some_work_on_package
-    - put: osc-resource
-      params: { commit: { message: "new release" } }
+  - get: osc-resource
+  - task: build
+    config:
+      run:
+        path: touch
+        args: [some_work_on_package]
+        directory: osc-resource
+  - put: osc-resource
+    params: { commit: { message: "new release" } }
 ```
 
 ## Behaviour
 
 ### `check`: Check for new revisions
 
-The remote build service is checked for versions.
+Checks the remote build service for versions.
 
 ### `in`: Fetch from build service
 
