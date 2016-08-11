@@ -1,6 +1,6 @@
 #!/bin/bash
 # ATTENTION: don't run locally, will overwrite your .oscrc!!!
-
+#
 # Input JSON from STDIN
 # {
 #   "source": {
@@ -13,6 +13,11 @@
 #   "version": { "ref": "61cebf" }
 # }
 
+set -e
+
+exec 3>&1 # make stdout available as fd 3 for the result
+exec 1>&2 # redirect all output to stderr for logging
+
 source $(dirname $0)/common.sh
 
 payload=$(mktemp /tmp/resource-in.XXXXXX)
@@ -22,7 +27,7 @@ parse_source_config
 create_oscrc
 
 output_single_version() {
-  cat <<EOF
+  cat >&3 <<EOF
 [
   { "ref": "$1" }
 ]
@@ -53,7 +58,7 @@ output_newer_versions() {
 
   # The list may be empty, if there are no versions available at the source.
   OUTPUT_STRING="[ $REFS ]"
-  echo $OUTPUT_STRING
+  echo $OUTPUT_STRING >&3
 }
 
 # version will be omitted from the first request, in which case the resource should return the current version (not every version since the resource's inception).

@@ -1,8 +1,6 @@
 #!/bin/sh
 # ATTENTION: don't run locally, will overwrite your .oscrc!!!
-
-set -e
-
+#
 # Input JSON from STDIN
 # {
 #   "source": {
@@ -14,6 +12,11 @@ set -e
 #   },
 #   "version": { "ref": "61cebf" }
 # }
+
+set -e
+
+exec 3>&1 # make stdout available as fd 3 for the result
+exec 1>&2 # redirect all output to stderr for logging
 
 source $(dirname $0)/common.sh
 
@@ -33,7 +36,7 @@ META=$(osc log --csv -r $VERSION)
 
 
 # The script must emit the fetched version, and may emit metadata as a list of key-value pairs. This data is intended for public consumption and will make it upstream, intended to be shown on the build's page.
-cat <<EOF
+cat >&3 <<EOF
 {
   "version": { "ref": "$VERSION" },
   "metadata": [
