@@ -82,9 +82,9 @@ cat >&3 <<EOF
 {
   "version": { "ref": "$VERSION" },
   "metadata": [
+    { "name": "revision", "value": "$(echo $META | cut -d\| -f1)" },
     { "name": "author", "value": "$(echo $META | cut -d\| -f2)" },
     { "name": "date", "value": "$(echo $META | cut -d\| -f3)" },
-    { "name": "revision", "value": "$VERSION" },
     { "name": "version", "value": "$(echo $META | cut -d\| -f5)" },
     { "name": "comment", "value": "$(echo $META | cut -d\| -f6)" }
   ]
