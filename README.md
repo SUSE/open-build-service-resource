@@ -46,7 +46,7 @@ jobs:
         args: [some_work_on_package]
         directory: osc-resource
   - put: osc-resource
-    params: { resource: "osc-resource", commit: { message: "new release" } }
+    params: { from: "osc-resource", commit: { message: "new release" } }
 ```
 
 ## Behaviour
@@ -70,7 +70,7 @@ In that case files from `add_files` will be added before commiting.
 
 #### Parameters
 
-     * `resource`: Path to the input folder containing the osc checkout
+     * `from`: Path to the folder containing the osc checkout
      * `remove_files`: Array of file names to remove.
      * `build.repository`: Repository to build for
      * `build.arch`: Arch to build for
@@ -82,7 +82,7 @@ In that case files from `add_files` will be added before commiting.
 ```
     - put: osc-resource
       params:
-        resource: osc-resource
+        from: osc-resource
         remove_files:
         - test.tmp
         - build-stamp

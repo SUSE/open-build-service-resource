@@ -9,9 +9,9 @@ mkdir -p tmp
 sh assets/out tmp <<EOF
 {
   "params": {
+     "from": "home:mmanno/restic",
      "remove_files": ["test.tmp", "build-stamp"],
      "build": {
-       "resource": "."
        "repository": "openSUSE_Leap_42.1",
        "arch": "x86_64"
      },

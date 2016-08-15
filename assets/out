@@ -43,7 +43,7 @@ if [ -z "$source" ]; then
   exit 1
 fi
 
-resource=$(jq -r '.params.resource // ""' < $payload)
+resource=$(jq -r '.params.from // ""' < $payload)
 build=$(jq -r '.params.build // ""' < $payload)
 repository=$(jq -r '.params.build.repository // ""' < $payload)
 arch=$(jq -r '.params.build.arch // ""' < $payload)
@@ -55,7 +55,7 @@ if [ -z "$resource" ]; then
   exit 1
 fi
 
-cd $source/$resource/$OSC_PROJECT/$OSC_PACKAGE
+cd $source/$resource
 
 for i in $(seq 0 $(expr "$files_count" - 1)); do
   file=$(jq -r ".params.remove_files[$i]" < $payload)
