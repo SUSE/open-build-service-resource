@@ -29,7 +29,14 @@ create_oscrc
 DESTINATION_DIR=$1
 
 cd $DESTINATION_DIR
-osc co -r $VERSION $OSC_PROJECT $OSC_PACKAGE
+
+CUR=$(osc log --csv $OSC_PROJECT/$OSC_PACKAGE | head -1 | cut -d\| -f4)
+
+if [ "$CUR" = "$VERSION" ]; then
+  osc co $OSC_PROJECT $OSC_PACKAGE
+else
+  osc co -r $VERSION $OSC_PROJECT $OSC_PACKAGE
+fi
 
 cd $OSC_PROJECT/$OSC_PACKAGE
 META=$(osc log --csv -r $VERSION)
