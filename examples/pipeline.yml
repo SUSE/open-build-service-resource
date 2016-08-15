@@ -1,0 +1,52 @@
+resource_types:
+- name: open-build-service-resource
+  type: docker-image
+  source:
+      repository: machinerytool/concourse-open-build-service-resource
+      tag: latest
+
+resources:
+- name: osc-resource
+  type: open-build-service-resource
+  source:
+    api: https://api.opensuse.org
+    project: home:mmanno
+    package : restic
+    username: {{osc-username}}
+    password: {{osc-password}}
+- name: git-build-service-repo
+  type: git
+  source:
+    uri: git@github.com:SUSE/open-build-service-resource.git
+    branch: master
+    private_key: {{private-repo-key}}
+
+jobs:
+- name: build
+  plan:
+  - get: git-build-service-repo
+    trigger: true
+  - get: osc-resource
+  - task: services
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source: {repository: machinerytool/osc_opensuse42.1}
+      inputs:
+      - name: osc-resource
+      - name: git-build-service-repo
+      run:
+        path: git-build-service-repo/examples/build.sh
+      params:
+        OSC_USERNAME:  {{osc-username}}
+        OSC_PASSWORD:  {{osc-password}}
+      outputs:
+      - name: osc-updated
+  - put: osc-resource
+    params:
+      from: osc-updated
+      commit:
+        add_files:
+        - test
+        message: "new automatic release via concourse"
