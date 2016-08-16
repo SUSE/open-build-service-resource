@@ -35,6 +35,7 @@ CUR=$(osc log --csv $OSC_PROJECT/$OSC_PACKAGE | head -1 | cut -d\| -f4)
 if [ "$CUR" = "$VERSION" ]; then
   osc co $OSC_PROJECT $OSC_PACKAGE
 else
+  echo "Warning: checking out a specific version, you need to run 'osc up' before committing"
   osc co -r $VERSION $OSC_PROJECT $OSC_PACKAGE
 fi
 
