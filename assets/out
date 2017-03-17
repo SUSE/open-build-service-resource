@@ -76,7 +76,8 @@ if [ ! -z "$commit_message" ]; then
 fi
 
 # The script must emit the resulting version of the resource.
-META=$(osc log --csv | head -1)
+# also filter out any possible " quotes from the commit message
+META=$(osc log --csv | head -1 | sed -e 's/\"//g')
 VERSION=$(echo $META | cut -d\| -f4)
 cat >&3 <<EOF
 {
