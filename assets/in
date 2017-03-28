@@ -40,7 +40,8 @@ else
 fi
 
 cd $OSC_PROJECT/$OSC_PACKAGE
-META=$(osc log --csv -r $VERSION)
+# filter out any possible " quotes from the commit message
+META=$(osc log --csv -r $VERSION | sed -e 's/\"//g')
 
 
 # The script must emit the fetched version, and may emit metadata as a list of key-value pairs. This data is intended for public consumption and will make it upstream, intended to be shown on the build's page.
