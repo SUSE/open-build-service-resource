@@ -1,4 +1,4 @@
-FROM machinerytool/osc_opensuse42.1
+FROM machinerytool/osc_opensuse:leap
 
 RUN zypper -n in jq
 
