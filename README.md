@@ -64,6 +64,7 @@ Checks out sources from the build service.
 First `osc rm` is called on all array members of `remove_files` if present.
 
 If a `build` hash is present in the params, `osc build` will be called for the specified `repository` and `version`.
+The build is non-interactive so osc trust all projects which are part of the specified build project.
 
 The resource will commit changes to the build service if a commit message is present in `message`.
 In that case files from `add_files` will be added before commiting.

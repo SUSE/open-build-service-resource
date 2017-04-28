@@ -63,7 +63,7 @@ for i in $(seq 0 $(expr "$files_count" - 1)); do
 done
 
 if [ ! -z "$build" ]; then
-  osc build $repository $arch
+  osc build --trust-all-projects $repository $arch
 fi
 
 if [ ! -z "$commit_message" ]; then
