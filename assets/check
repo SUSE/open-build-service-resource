@@ -35,14 +35,14 @@ EOF
 }
 
 output_current() {
-  CUR=$(osc log --csv $OSC_PROJECT/$OSC_PACKAGE | head -1 | cut -d\| -f4)
+  CUR=$(osc log --csv $OSC_PROJECT/$OSC_PACKAGE | head -1 | cut -d\| -f4 | sed -e 's/\"//g')
   output_single_version $CUR
 }
 
 output_newer_versions() {
   VERSION="$1"
   REFS=''
-  for version in $(osc log --csv $OSC_PROJECT/$OSC_PACKAGE | cut -d\| -f4); do
+  for version in $(osc log --csv $OSC_PROJECT/$OSC_PACKAGE | cut -d\| -f4 | sed -e 's/\"//g'); do
 
     NEW_REF="{ \"ref\": \"$version\" }"
     if [ "${#REFS}" != "0" ]; then
