@@ -10,14 +10,12 @@ sh assets/out tmp <<EOF
 {
   "params": {
      "from": "home:mmanno/restic",
-     "remove_files": ["test.tmp", "build-stamp"],
      "build": {
        "repository": "openSUSE_Leap_42.1",
        "arch": "x86_64"
      },
      "commit": {
        "message": "new release",
-       "add_files": ["*.tgz"]
      }
   },
   "source": {

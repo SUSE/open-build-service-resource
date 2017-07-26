@@ -52,6 +52,4 @@ jobs:
         repository: openSUSE_Leap_42.1
         arch: x86_64
       commit:
-        add_files:
-        - test
         message: "new automatic release via concourse"
