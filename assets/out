@@ -4,14 +4,12 @@
 # Input JSON from STDIN
 # {
 #   "params": {
-#     "remove_files": ["test.tmp", "build-stamp"],
 #     "build": {
 #       "repository": "openSUSE_Leap_42.1",
 #       "arch": "x86_64"
 #     },
 #     "commit": {
 #       "message": "new release",
-#       "add_files": ["*.tgz"]
 #     }
 #   },
 #   "source": {
@@ -48,7 +46,6 @@ build=$(jq -r '.params.build // ""' < $payload)
 repository=$(jq -r '.params.build.repository // ""' < $payload)
 arch=$(jq -r '.params.build.arch // ""' < $payload)
 commit_message=$(jq -r '.params.commit.message // ""' < $payload)
-files_count=$(jq -r '.params.remove_files | length' < $payload)
 
 if [ -z "$resource" ]; then
   echo "invalid payload (missing resource)"
@@ -57,21 +54,13 @@ fi
 
 cd $source/$resource
 
-for i in $(seq 0 $(expr "$files_count" - 1)); do
-  file=$(jq -r ".params.remove_files[$i]" < $payload)
-  osc rm -f "$file"
-done
+osc addremove
 
 if [ ! -z "$build" ]; then
   osc build --trust-all-projects $repository $arch
 fi
 
 if [ ! -z "$commit_message" ]; then
-  files_count=$(jq -r '.params.commit.add_files | length' < $payload)
-  for i in $(seq 0 $(expr "$files_count" - 1)); do
-    file=$(jq -r ".params.commit.add_files[$i]" < $payload)
-    osc add "$file"
-  done
   osc commit -m"$commit_message"
 fi
 

@@ -49,6 +49,4 @@ jobs:
     params:
       from: osc-updated
       commit:
-        add_files:
-        - test
         message: "new automatic release via concourse"
