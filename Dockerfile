@@ -1,4 +1,4 @@
-FROM opensuse:leap
+FROM opensuse/leap
 
 RUN zypper -v -n in osc build sudo obs-service-download_files obs-service-recompress \
     obs-service-set_version obs-service-source_validator obs-service-tar_scm \
